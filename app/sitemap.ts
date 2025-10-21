@@ -1,25 +1,27 @@
 export default function sitemap() {
+  const baseUrl = 'https://ortus-chi.vercel.app';
+
   return [
     {
-      url: 'https://ortus-bistro.com',
+      url: `${baseUrl}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: 'https://ortus-bistro.com/menu',
+      url: `${baseUrl}/menu`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: 'https://ortus-bistro.com/about',
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
-      url: 'https://ortus-bistro.com/contact',
+      url: `${baseUrl}/contact`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
