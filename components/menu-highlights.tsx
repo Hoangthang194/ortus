@@ -1,9 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import ImageLightbox from "./image-lightbox"
 
 export default function MenuHighlights() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [lightbox, setLightbox] = useState({
+    isOpen: false,
+    image: { src: "", alt: "" }
+  })
   
   const menuImages = [
     {
@@ -39,18 +44,21 @@ export default function MenuHighlights() {
 
         <div className="relative max-w-4xl mx-auto">
           {/* Slider Container */}
-          <div className="relative h-[600px] rounded-xl overflow-hidden shadow-2xl">
+          <div className="relative rounded-xl overflow-hidden shadow-2xl">
             <div 
-              className="flex transition-transform duration-500 ease-in-out h-full"
+              className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
               {menuImages.map((image, index) => (
-                <div key={index} className="w-full h-full flex-shrink-0">
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    className="w-full h-full object-cover object-center"
-                  />
+                <div key={index} className="w-full flex-shrink-0">
+                  <div className="relative w-full pb-[100%] sm:pb-[120%] md:pb-[100%]">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="absolute inset-0 w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => setLightbox({ isOpen: true, image })}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -58,7 +66,7 @@ export default function MenuHighlights() {
             {/* Navigation Arrows */}
             <button
               onClick={() => setCurrentSlide(currentSlide === 0 ? menuImages.length - 1 : currentSlide - 1)}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300"
+              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 sm:p-3 rounded-full transition-all duration-300"
               aria-label="Previous slide"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +76,7 @@ export default function MenuHighlights() {
 
             <button
               onClick={() => setCurrentSlide(currentSlide === menuImages.length - 1 ? 0 : currentSlide + 1)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300"
+              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 sm:p-3 rounded-full transition-all duration-300"
               aria-label="Next slide"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,6 +102,14 @@ export default function MenuHighlights() {
           </div>
         </div>
       </div>
+
+      {/* Lightbox */}
+      <ImageLightbox
+        isOpen={lightbox.isOpen}
+        onClose={() => setLightbox({ isOpen: false, image: { src: "", alt: "" } })}
+        imageSrc={lightbox.image.src}
+        imageAlt={lightbox.image.alt}
+      />
     </section>
   )
 }

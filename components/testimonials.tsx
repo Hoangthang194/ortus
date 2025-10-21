@@ -59,12 +59,31 @@ const testimonials: Testimonial[] = [
 export default function Testimonials() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [slidesPerView, setSlidesPerView] = useState(4)
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setSlidesPerView(1)
+      } else if (window.innerWidth < 768) {
+        setSlidesPerView(2)
+      } else if (window.innerWidth < 1024) {
+        setSlidesPerView(3)
+      } else {
+        setSlidesPerView(4)
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     if (!isAutoPlaying) return
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % (testimonials.length - 3))
+      setCurrentSlide((prev) => (prev + 1) % (testimonials.length - (slidesPerView - 1)))
     }, 4000)
 
     return () => clearInterval(interval)
@@ -76,12 +95,12 @@ export default function Testimonials() {
   }
 
   const goToPrevious = () => {
-    setCurrentSlide((prev) => (prev === 0 ? testimonials.length - 4 : prev - 1))
+    setCurrentSlide((prev) => (prev === 0 ? testimonials.length - slidesPerView : prev - 1))
     setIsAutoPlaying(false)
   }
 
   const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % (testimonials.length - 3))
+    setCurrentSlide((prev) => (prev + 1) % (testimonials.length - (slidesPerView - 1)))
     setIsAutoPlaying(false)
   }
 
@@ -101,11 +120,15 @@ export default function Testimonials() {
           <div className="overflow-hidden rounded-lg">
             <div 
               className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentSlide * 25}%)` }}
+              style={{ transform: `translateX(-${currentSlide * (100/slidesPerView)}%)` }}
             >
               {testimonials.map((testimonial, index) => (
-                <div key={index} className="w-1/4 flex-shrink-0 px-3">
-                  <div className="bg-background rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
+                <div key={index} className={`${
+                  slidesPerView === 1 ? 'w-full' : 
+                  slidesPerView === 2 ? 'w-1/2' : 
+                  slidesPerView === 3 ? 'w-1/3' : 'w-1/4'
+                } flex-shrink-0 px-2 sm:px-3`}>
+                  <div className="bg-background rounded-lg p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow duration-300 h-full min-h-[200px] flex flex-col justify-between">
                     {/* Customer Info */}
                     <div className="flex flex-col items-center gap-3 mb-4">
                       <div className="text-center">
@@ -132,7 +155,7 @@ export default function Testimonials() {
           {/* Navigation Arrows */}
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-primary/80 hover:bg-primary text-primary-foreground p-2 rounded-full transition-all duration-300 hover:scale-110"
+            className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-primary/80 hover:bg-primary text-primary-foreground p-1.5 sm:p-2 rounded-full transition-all duration-300 hover:scale-110 z-10"
             aria-label="Previous testimonials"
           >
             <ChevronLeft size={20} />
@@ -140,7 +163,7 @@ export default function Testimonials() {
           
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-primary/80 hover:bg-primary text-primary-foreground p-2 rounded-full transition-all duration-300 hover:scale-110"
+            className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-primary/80 hover:bg-primary text-primary-foreground p-1.5 sm:p-2 rounded-full transition-all duration-300 hover:scale-110 z-10"
             aria-label="Next testimonials"
           >
             <ChevronRight size={20} />
@@ -148,7 +171,7 @@ export default function Testimonials() {
 
           {/* Dots Indicator */}
           <div className="flex justify-center mt-6 space-x-2">
-            {Array.from({ length: testimonials.length - 3 }).map((_, index) => (
+            {Array.from({ length: testimonials.length - (slidesPerView - 1) }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}

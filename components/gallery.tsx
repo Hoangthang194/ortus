@@ -3,8 +3,33 @@
 import { useState, useEffect, useRef } from "react"
 
 export default function Gallery() {
-  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
+  const [animatedItems, setAnimatedItems] = useState<Set<number>>(new Set())
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    const observers = itemRefs.current.map((ref, index) => {
+      if (!ref) return null
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && !animatedItems.has(index)) {
+              setAnimatedItems(prev => new Set([...prev, index]))
+              observer.unobserve(entry.target)
+            }
+          })
+        },
+        { threshold: 0.1 }
+      )
+
+      observer.observe(ref)
+      return observer
+    })
+
+    return () => {
+      observers.forEach(observer => observer?.disconnect())
+    }
+  }, [animatedItems])
 
   const images = [
     {
@@ -57,36 +82,6 @@ export default function Gallery() {
     },
   ]
 
-  useEffect(() => {
-    const observers = itemRefs.current.map((ref, index) => {
-      if (!ref) return null
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setVisibleItems(prev => new Set([...prev, index]))
-            } else {
-              setVisibleItems(prev => {
-                const newSet = new Set(prev)
-                newSet.delete(index)
-                return newSet
-              })
-            }
-          })
-        },
-        { threshold: 0.1 }
-      )
-
-      observer.observe(ref)
-      return observer
-    })
-
-    return () => {
-      observers.forEach(observer => observer?.disconnect())
-    }
-  }, [])
-
   return (
     <section className="py-20 bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -101,12 +96,10 @@ export default function Gallery() {
               key={index}
               ref={(el) => { itemRefs.current[index] = el }}
               className={`relative h-48 sm:h-56 lg:h-48 xl:h-52 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 group ${
-                visibleItems.has(index) 
-                  ? (index % 4 < 2 ? 'animate-slide-in-left' : 'animate-slide-in-right')
-                  : 'opacity-0'
+                animatedItems.has(index) ? (index % 4 < 2 ? 'animate-slide-in-left' : 'animate-slide-in-right') : 'opacity-0'
               }`}
               style={{ 
-                animationDelay: visibleItems.has(index) ? `${index * 0.1}s` : '0s'
+                animationDelay: animatedItems.has(index) ? `${index * 0.1}s` : '0s'
               }}
             >
               <img

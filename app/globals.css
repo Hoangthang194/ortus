@@ -188,6 +188,7 @@
 
   .animate-slide-in-left {
     animation: slideInLeft 1s ease-out forwards;
+    animation-play-state: paused;
   }
 
   @keyframes slideInLeft {
@@ -203,6 +204,7 @@
 
   .animate-slide-in-right {
     animation: slideInRight 1s ease-out forwards;
+    animation-play-state: paused;
   }
 
   @keyframes slideInRight {
@@ -214,6 +216,13 @@
       opacity: 1;
       transform: translateX(0);
     }
+  }
+
+  /* Run animations only on page load */
+  .animate-slide-in-left:not(.animated),
+  .animate-slide-in-right:not(.animated) {
+    animation-play-state: running;
+    animation-iteration-count: 1;
   }
 
   .animate-slide-up {

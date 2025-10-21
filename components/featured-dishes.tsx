@@ -3,8 +3,33 @@
 import { useState, useEffect, useRef } from "react"
 
 export default function FeaturedDishes() {
-  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
+  const [animatedItems, setAnimatedItems] = useState<Set<number>>(new Set())
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    const observers = itemRefs.current.map((ref, index) => {
+      if (!ref) return null
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && !animatedItems.has(index)) {
+              setAnimatedItems(prev => new Set([...prev, index]))
+              observer.unobserve(entry.target)
+            }
+          })
+        },
+        { threshold: 0.1 }
+      )
+
+      observer.observe(ref)
+      return observer
+    })
+
+    return () => {
+      observers.forEach(observer => observer?.disconnect())
+    }
+  }, [animatedItems])
 
   const dishes = [
     {
@@ -24,36 +49,6 @@ export default function FeaturedDishes() {
     },
   ]
 
-  useEffect(() => {
-    const observers = itemRefs.current.map((ref, index) => {
-      if (!ref) return null
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setVisibleItems(prev => new Set([...prev, index]))
-            } else {
-              setVisibleItems(prev => {
-                const newSet = new Set(prev)
-                newSet.delete(index)
-                return newSet
-              })
-            }
-          })
-        },
-        { threshold: 0.1 }
-      )
-
-      observer.observe(ref)
-      return observer
-    })
-
-    return () => {
-      observers.forEach(observer => observer?.disconnect())
-    }
-  }, [])
-
   return (
     <section className="py-20 bg-muted/20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,12 +63,10 @@ export default function FeaturedDishes() {
               key={index}
               ref={(el) => { itemRefs.current[index] = el }}
               className={`bg-card rounded-lg overflow-hidden hover:shadow-lg transition-shadow ${
-                visibleItems.has(index) 
-                  ? (index === 1 ? 'animate-slide-up' : (index === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right'))
-                  : 'opacity-0'
+                animatedItems.has(index) ? (index === 1 ? 'animate-slide-up' : (index === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right')) : 'opacity-0'
               }`}
               style={{ 
-                animationDelay: visibleItems.has(index) ? `${index * 0.2}s` : '0s'
+                animationDelay: animatedItems.has(index) ? `${index * 0.2}s` : '0s'
               }}
             >
               <div className="relative h-64 overflow-hidden">
