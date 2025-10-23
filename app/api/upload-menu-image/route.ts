@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
+import { v2 as cloudinary } from 'cloudinary'
 import { v4 as uuidv4 } from "uuid"
+
+// Cấu hình Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,80 +39,63 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Kích thước file không được vượt quá 5MB" }, { status: 400 })
     }
 
-    console.log("Processing file buffer...")
+    // Convert file to base64
+    console.log("Converting file to base64...")
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    console.log("Buffer size:", buffer.length, "bytes")
+    const base64String = buffer.toString('base64')
+    const dataURI = `data:${file.type};base64,${base64String}`
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", "menu")
-    console.log("Uploads directory:", uploadsDir)
-    await mkdir(uploadsDir, { recursive: true })
-    console.log("Directory created/verified")
-
-    // Generate unique filename
-    const fileExtension = file.name.split('.').pop()
-    const filename = `${uuidv4()}.${fileExtension}`
-    const filepath = join(uploadsDir, filename)
-    console.log("Generated filename:", filename)
-    console.log("Full filepath:", filepath)
-
-    // Save file
-    console.log("Writing file to disk...")
-    await writeFile(filepath, buffer)
-    console.log("File saved successfully")
+    // Upload to Cloudinary
+    console.log("Uploading to Cloudinary...")
+    const uploadResult = await cloudinary.uploader.upload(dataURI, {
+      folder: 'ortus/menu',
+      resource_type: 'auto',
+      public_id: uuidv4(),
+    })
+    console.log("Upload successful, URL:", uploadResult.secure_url)
 
     // Create image object
     const image = {
-      id: uuidv4(),
-      src: `/uploads/menu/${filename}`,
+      id: uploadResult.public_id,
+      src: uploadResult.secure_url,
       alt: `Menu Image ${Date.now()}`
     }
     console.log("Created image object:", image)
 
-    // Load existing images
-    const dataPath = join(process.cwd(), "data", "menu-images.json")
-    console.log("Data file path:", dataPath)
-    let images = []
-    
+    // Save URL to JSON file
     try {
-      const fs = require("fs")
+      const fs = require('fs')
+      const path = require('path')
+      const dataDir = path.join(process.cwd(), 'data')
+      const dataPath = path.join(dataDir, 'menu-images.json')
+
+      // Create data directory if it doesn't exist
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true })
+      }
+
+      // Read existing data or create new array
+      let images = []
       if (fs.existsSync(dataPath)) {
-        console.log("Reading existing data file...")
-        const data = fs.readFileSync(dataPath, "utf8")
+        const data = fs.readFileSync(dataPath, 'utf8')
         const parsed = JSON.parse(data)
         images = parsed.images || []
-        console.log("Loaded existing images:", images.length)
-      } else {
-        console.log("Data file does not exist, starting with empty array")
       }
+
+      // Add new image and save
+      images.push(image)
+      fs.writeFileSync(dataPath, JSON.stringify({ images }, null, 2))
+      console.log("Image URL saved to JSON file")
     } catch (error) {
-      console.error("Error reading existing images:", error)
+      console.error("Error saving to JSON:", error)
+      // Continue anyway since the image was uploaded successfully
     }
-
-    // Add new image
-    images.push(image)
-    console.log("Added new image, total images:", images.length)
-
-    // Save updated images
-    const fs = require("fs")
-    const dataDir = join(process.cwd(), "data")
-    console.log("Data directory:", dataDir)
-    await mkdir(dataDir, { recursive: true })
-    console.log("Data directory created/verified")
-    
-    console.log("Writing updated data to file...")
-    fs.writeFileSync(dataPath, JSON.stringify({ images }, null, 2))
-    console.log("Data file updated successfully")
 
     console.log("=== UPLOAD MENU IMAGE SUCCESS ===")
     return NextResponse.json({ image })
   } catch (error) {
     console.error("=== UPLOAD MENU IMAGE ERROR ===")
-    console.error("Error type:", error.constructor.name)
-    console.error("Error message:", error.message)
-    console.error("Error stack:", error.stack)
-    console.error("Full error object:", error)
     console.error("=== END ERROR LOG ===")
     return NextResponse.json({ error: "Lỗi khi upload ảnh" }, { status: 500 })
   }

@@ -125,11 +125,6 @@ export default function AdminPage() {
         console.log("=== ADMIN UPLOAD FAILED ===")
       }
     } catch (error) {
-      console.error("=== ADMIN UPLOAD ERROR ===")
-      console.error("Error type:", error.constructor.name)
-      console.error("Error message:", error.message)
-      console.error("Error stack:", error.stack)
-      console.error("Full error object:", error)
       console.error("=== END ADMIN ERROR LOG ===")
       setError("Lỗi khi upload ảnh")
     } finally {
