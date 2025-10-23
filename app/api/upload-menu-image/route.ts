@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { v2 as cloudinary } from 'cloudinary'
 import { v4 as uuidv4 } from "uuid"
+import { createClient } from '@supabase/supabase-js'
 
 // Cấu hình Cloudinary
 cloudinary.config({
@@ -8,6 +9,14 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
+
+// Initialize Supabase client (uses service_role key on server)
+const supabaseUrl = process.env.SUPABASE_URL || ''
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || ''
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Table name configurable by env var (some projects have different table names)
+const TABLE_NAME = process.env.SUPABASE_TABLE || 'menu_images'
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,7 +58,6 @@ export async function POST(request: NextRequest) {
     // Upload to Cloudinary
     console.log("Uploading to Cloudinary...")
     const uploadResult = await cloudinary.uploader.upload(dataURI, {
-      folder: 'ortus/menu',
       resource_type: 'auto',
       public_id: uuidv4(),
     })
@@ -63,33 +71,25 @@ export async function POST(request: NextRequest) {
     }
     console.log("Created image object:", image)
 
-    // Save URL to JSON file
+    // Save record to Supabase
     try {
-      const fs = require('fs')
-      const path = require('path')
-      const dataDir = path.join(process.cwd(), 'data')
-      const dataPath = path.join(dataDir, 'menu-images.json')
+      const { data: insertData, error: insertError } = await supabase
+        .from('ortus_db')
+        .insert([
+          {
+            id: image.id,
+            src: image.src,
+            alt: image.alt,
+          },
+        ])
 
-      // Create data directory if it doesn't exist
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true })
+      if (insertError) {
+        console.error('Supabase insert error:', insertError)
+      } else {
+        console.log('Saved image record to Supabase:', insertData)
       }
-
-      // Read existing data or create new array
-      let images = []
-      if (fs.existsSync(dataPath)) {
-        const data = fs.readFileSync(dataPath, 'utf8')
-        const parsed = JSON.parse(data)
-        images = parsed.images || []
-      }
-
-      // Add new image and save
-      images.push(image)
-      fs.writeFileSync(dataPath, JSON.stringify({ images }, null, 2))
-      console.log("Image URL saved to JSON file")
     } catch (error) {
-      console.error("Error saving to JSON:", error)
-      // Continue anyway since the image was uploaded successfully
+      console.error('Error saving to Supabase:', error)
     }
 
     console.log("=== UPLOAD MENU IMAGE SUCCESS ===")
