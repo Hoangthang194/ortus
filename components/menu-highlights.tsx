@@ -3,23 +3,66 @@
 import { useState, useEffect } from "react"
 import ImageLightbox from "./image-lightbox"
 
+interface MenuImage {
+  id: string
+  src: string
+  alt: string
+}
+
 export default function MenuHighlights() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [lightbox, setLightbox] = useState({
     isOpen: false,
     image: { src: "", alt: "" }
   })
+  const [menuImages, setMenuImages] = useState<MenuImage[]>([])
+  const [loading, setLoading] = useState(true)
   
-  const menuImages = [
-    {
-      src: "/menu_ortus_1.jpg",
-      alt: "Ortus Menu Page 1"
-    },
-    {
-      src: "/menu_ortus_2.jpg", 
-      alt: "Ortus Menu Page 2"
+  // Load menu images from API
+  useEffect(() => {
+    const loadMenuImages = async () => {
+      try {
+        const response = await fetch("/api/menu-images")
+        if (response.ok) {
+          const data = await response.json()
+          setMenuImages(data.images || [])
+        } else {
+          // Fallback to default images if API fails
+          setMenuImages([
+            {
+              id: "default-1",
+              src: "/menu_ortus_1.jpg",
+              alt: "Ortus Menu Page 1"
+            },
+            {
+              id: "default-2", 
+              src: "/menu_ortus_2.jpg",
+              alt: "Ortus Menu Page 2"
+            }
+          ])
+        }
+      } catch (error) {
+        console.error("Error loading menu images:", error)
+        // Fallback to default images
+        setMenuImages([
+          {
+            id: "default-1",
+            src: "/menu_ortus_1.jpg",
+            alt: "Ortus Menu Page 1"
+          },
+          {
+            id: "default-2", 
+            src: "/menu_ortus_2.jpg",
+            alt: "Ortus Menu Page 2"
+          }
+        ])
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    loadMenuImages()
+  }, [])
 
   // Auto slide every 3 seconds
   useEffect(() => {
@@ -32,6 +75,39 @@ export default function MenuHighlights() {
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index)
+  }
+
+  // Don't render if loading or no images
+  if (loading) {
+    return (
+      <section className="py-20 bg-primary text-primary-foreground">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-serif font-bold mb-4">Menu Highlights</h2>
+            <p className="text-lg opacity-90">Explore our delicious menu</p>
+          </div>
+          <div className="flex justify-center items-center py-20">
+            <div className="text-lg opacity-70">Đang tải menu...</div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (menuImages.length === 0) {
+    return (
+      <section className="py-20 bg-primary text-primary-foreground">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-serif font-bold mb-4">Menu Highlights</h2>
+            <p className="text-lg opacity-90">Explore our delicious menu</p>
+          </div>
+          <div className="flex justify-center items-center py-20">
+            <div className="text-lg opacity-70">Menu đang được cập nhật...</div>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -50,8 +126,8 @@ export default function MenuHighlights() {
               style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
               {menuImages.map((image, index) => (
-                <div key={index} className="w-full flex-shrink-0">
-                  <div className="relative w-full pb-[100%] sm:pb-[120%] md:pb-[100%]">
+                <div key={image.id} className="w-full flex-shrink-0">
+                  <div className="relative w-full pb-[60%] sm:pb-[70%] md:pb-[60%]">
                     <img
                       src={image.src}
                       alt={image.alt}

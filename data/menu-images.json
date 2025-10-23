@@ -1,0 +1,24 @@
+{
+  "images": [
+    {
+      "id": "0bc9c66c-d162-44e8-94b1-10be7a673d31",
+      "src": "/uploads/menu/5e3548a0-0c07-4465-8615-9223132dade3.jpg",
+      "alt": "Menu Image 1761222337633"
+    },
+    {
+      "id": "bfa23ace-25b9-43f7-908b-df1d8bab6fcc",
+      "src": "/uploads/menu/b3e21c7b-753d-4188-a1c4-32530cc3ac60.jpg",
+      "alt": "Menu Image 1761222347688"
+    },
+    {
+      "id": "4e6fab5f-efd9-4e8a-819e-868229b49a4a",
+      "src": "/uploads/menu/2c5a9d7a-47df-4bb3-b323-1c25e571f269.jpg",
+      "alt": "Menu Image 1761222356563"
+    },
+    {
+      "id": "0aefafdf-af27-4b18-87d9-bffe2da0f66e",
+      "src": "/uploads/menu/614ce354-2d47-405e-be47-a1610bbbde2b.jpg",
+      "alt": "Menu Image 1761222416033"
+    }
+  ]
+}
