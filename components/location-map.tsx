@@ -35,9 +35,7 @@ export default function LocationMap() {
           >
             <h3 className="text-xl font-semibold text-foreground mb-2">Address</h3>
             <p className="text-muted-foreground">
-              270 Vo Nguyen Giap
-              <br />
-              District 1, Ho Chi Minh City
+              Bãi Tắm, Tân Trà, Đà Nẵng
             </p>
           </div>
 
@@ -46,8 +44,8 @@ export default function LocationMap() {
             style={{ animationDelay: "0.5s" }}
           >
             <h3 className="text-xl font-semibold text-foreground mb-2">Phone</h3>
-            <a href="tel:+84946188848" className="text-primary hover:text-primary/80 transition-colors font-semibold">
-              +84 94 618 88 48
+            <a href="tel:0975643330" className="text-primary hover:text-primary/80 transition-colors font-semibold">
+              0975643330
             </a>
           </div>
 

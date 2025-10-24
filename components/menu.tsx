@@ -1,9 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import MenuItem from "./menu-item"
 
-const menuData = {
+interface MenuItem {
+  name: string
+  description?: string
+  price: string
+}
+
+interface MenuCategory {
+  title: string
+  description?: string
+  items: MenuItem[]
+}
+
+type MenuData = {
+  [key: string]: MenuCategory
+}
+
+const menuData: MenuData = {
   skewers: {
     title: "Skewers",
     description:
@@ -125,9 +141,13 @@ const menuData = {
 }
 
 export default function Menu() {
-  const [activeCategory, setActiveCategory] = useState("skewers")
+  const [activeCategory, setActiveCategory] = useState<keyof MenuData>("skewers")
 
-  const categories = Object.keys(menuData) as Array<keyof typeof menuData>
+  // Memoize categories to prevent unnecessary recalculation
+  const categories = useMemo(() => Object.keys(menuData), []) as Array<keyof MenuData>
+
+  // Memoize active category data to prevent unnecessary re-renders
+  const activeCategoryData = useMemo(() => menuData[activeCategory], [activeCategory])
 
   return (
     <section id="menu" className="py-20 bg-background">
@@ -159,17 +179,20 @@ export default function Menu() {
         {/* Menu Items */}
         <div className="bg-card rounded-xl p-8 border border-border">
           <h3 className="text-3xl font-serif font-bold text-foreground mb-2">
-            {menuData[activeCategory as keyof typeof menuData].title}
+            {activeCategoryData.title}
           </h3>
-          {menuData[activeCategory as keyof typeof menuData].description && (
+          {activeCategoryData.description && (
             <p className="text-muted-foreground font-sans mb-8">
-              {menuData[activeCategory as keyof typeof menuData].description}
+              {activeCategoryData.description}
             </p>
           )}
 
           <div className="grid gap-6">
-            {menuData[activeCategory as keyof typeof menuData].items.map((item, index) => (
-              <MenuItem key={index} item={item} />
+            {activeCategoryData.items.map((item) => (
+              <MenuItem 
+                key={`${activeCategory}-${item.name}`} 
+                item={item} 
+              />
             ))}
           </div>
         </div>

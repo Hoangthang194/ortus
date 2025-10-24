@@ -1,23 +1,104 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+
+interface MenuImage {
+  id: string
+  src: string
+  alt: string
+  title?: string
+}
 
 export default function MenuGallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
+  const [menuImages, setMenuImages] = useState<MenuImage[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const menuImages = [
-    {
-      src: "/menu_ortus_1.jpg",
-      alt: "Ortus Bistro Menu - Skewers and Dinner",
-      title: "Skewers & Dinner Menu",
-    },
-    {
-      src: "/menu_ortus_2.jpg",
-      alt: "Ortus Bistro Menu - Breakfast and Lunch",
-      title: "Breakfast & Lunch Menu",
-    },
-  ]
+  // Load menu images from API
+  useEffect(() => {
+    const loadMenuImages = async () => {
+      try {
+        const response = await fetch("/api/menu-images")
+        if (response.ok) {
+          const data = await response.json()
+          const images = data.images.map((img: MenuImage) => ({
+            ...img,
+            title: img.alt.includes("Dinner") ? "Skewers & Dinner Menu" : "Breakfast & Lunch Menu"
+          }))
+          setMenuImages(images)
+        } else {
+          // Fallback to default images if API fails
+          setMenuImages([
+            {
+              id: "default-1",
+              src: "/menu_ortus_1.jpg",
+              alt: "Ortus Bistro Menu - Skewers and Dinner",
+              title: "Skewers & Dinner Menu",
+            },
+            {
+              id: "default-2",
+              src: "/menu_ortus_2.jpg",
+              alt: "Ortus Bistro Menu - Breakfast and Lunch",
+              title: "Breakfast & Lunch Menu",
+            },
+          ])
+        }
+      } catch (error) {
+        console.error("Error loading menu images:", error)
+        // Fallback to default images
+        setMenuImages([
+          {
+            id: "default-1",
+            src: "/menu_ortus_1.jpg",
+            alt: "Ortus Bistro Menu - Skewers and Dinner",
+            title: "Skewers & Dinner Menu",
+          },
+          {
+            id: "default-2",
+            src: "/menu_ortus_2.jpg",
+            alt: "Ortus Bistro Menu - Breakfast and Lunch",
+            title: "Breakfast & Lunch Menu",
+          },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadMenuImages()
+  }, [])
+
+  // Don't render if loading or no images
+  if (loading) {
+    return (
+      <section className="py-16 md:py-24 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4 text-center text-balance">
+            Our Menu
+          </h1>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Loading menu...
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  if (menuImages.length === 0) {
+    return (
+      <section className="py-16 md:py-24 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4 text-center text-balance">
+            Our Menu
+          </h1>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Menu is being updated...
+          </p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="py-16 md:py-24 px-4">

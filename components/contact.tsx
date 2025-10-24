@@ -17,10 +17,10 @@ export default function Contact() {
             </div>
             <h3 className="text-xl font-serif font-bold text-primary mb-2">Call Us</h3>
             <a
-              href="tel:+84946188848"
+              href="tel:0975643330"
               className="text-lg text-primary hover:text-primary/80 transition-colors font-sans"
             >
-              +84 94 618 88 48
+              0975643330
             </a>
           </div>
 
