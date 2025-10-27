@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useState, useEffect } from "react"
+import useSiteInfo from "@/hooks/use-site-info"
 
 interface MenuImage {
   id: string
@@ -14,6 +15,7 @@ export default function MenuGallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
   const [menuImages, setMenuImages] = useState<MenuImage[]>([])
   const [loading, setLoading] = useState(true)
+  const { phoneNumber } = useSiteInfo()
 
   // Load menu images from API
   useEffect(() => {
@@ -196,7 +198,7 @@ export default function MenuGallery() {
         <div className="text-center mt-12">
           <p className="text-foreground mb-6">Ready to experience our cuisine?</p>
           <a
-            href="tel:+84946188848"
+            href={phoneNumber ? `tel:${phoneNumber}` : 'tel:+84946188848'}
             className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-sans font-medium"
           >
             Call to Reserve

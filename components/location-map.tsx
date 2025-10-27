@@ -1,13 +1,17 @@
 "use client"
 
+import useSiteInfo from "@/hooks/use-site-info"
+
 export default function LocationMap() {
+  const { phoneNumber, address } = useSiteInfo()
+
   return (
     <section className="py-16 bg-background animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-serif font-bold text-foreground mb-4">📍 Ortus Bistro & Beers</h2>
-          <p className="text-muted-foreground text-lg">Find us at Bãi Tắm, Tân Trà, Đà Nẵng 50000</p>
+          <p className="text-muted-foreground text-lg">{address || 'Find us at Bãi Tắm, Tân Trà, Đà Nẵng 50000'}</p>
         </div>
 
         {/* Map Container */}
@@ -35,7 +39,7 @@ export default function LocationMap() {
           >
             <h3 className="text-xl font-semibold text-foreground mb-2">Address</h3>
             <p className="text-muted-foreground">
-              Bãi Tắm, Tân Trà, Đà Nẵng
+              {address || 'Bãi Tắm, Tân Trà, Đà Nẵng'}
             </p>
           </div>
 
@@ -44,8 +48,8 @@ export default function LocationMap() {
             style={{ animationDelay: "0.5s" }}
           >
             <h3 className="text-xl font-semibold text-foreground mb-2">Phone</h3>
-            <a href="tel:0975643330" className="text-primary hover:text-primary/80 transition-colors font-semibold">
-              0975643330
+            <a href={phoneNumber ? `tel:${phoneNumber}` : "tel:0975643330"} className="text-primary hover:text-primary/80 transition-colors font-semibold">
+              {phoneNumber || '0975643330'}
             </a>
           </div>
 

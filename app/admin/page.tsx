@@ -21,6 +21,12 @@ export default function AdminPage() {
   const [menuImages, setMenuImages] = useState<MenuImage[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  // Site info (phone/address) stored in Supabase table `info_db`
+  const [infoId, setInfoId] = useState<string | null>(null)
+  const [phoneNumber, setPhoneNumber] = useState<string>("")
+  const [address, setAddress] = useState<string>("")
+  const [infoLoading, setInfoLoading] = useState(false)
+  const [infoSaving, setInfoSaving] = useState(false)
 
   // Check authentication on mount
   useEffect(() => {
@@ -28,6 +34,7 @@ export default function AdminPage() {
     if (auth === "true") {
       setIsAuthenticated(true)
       loadMenuImages()
+      loadSiteInfo()
     }
   }, [])
 
@@ -38,6 +45,7 @@ export default function AdminPage() {
       localStorage.setItem("admin_auth", "true")
       setError("")
       loadMenuImages()
+      loadSiteInfo()
     } else {
       setError("Sai tên đăng nhập hoặc mật khẩu")
     }
@@ -62,6 +70,30 @@ export default function AdminPage() {
       console.error("Error loading menu images:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadSiteInfo = async () => {
+    try {
+      setInfoLoading(true)
+      const res = await fetch('/api/info')
+      if (res.ok) {
+        const data = await res.json()
+        const infoArray = data.info || []
+        // If multiple records exist, choose the first one (you can change this behavior)
+        if (infoArray.length > 0) {
+          const first = infoArray[0]
+          setInfoId(first.id || null)
+          setPhoneNumber(first.phone_number || '')
+          setAddress(first.address || '')
+        }
+      } else {
+        console.error('Failed to load site info')
+      }
+    } catch (err) {
+      console.error('Error loading site info:', err)
+    } finally {
+      setInfoLoading(false)
     }
   }
 
@@ -175,6 +207,40 @@ export default function AdminPage() {
     }
   }
 
+  const handleSaveInfo = async () => {
+    try {
+      setInfoSaving(true)
+      setError("")
+      const payload: any = { phone_number: phoneNumber, address }
+      if (infoId) payload.id = infoId
+  // enforce type to target the ortus info row
+  payload.type = 'ortus'
+
+      const res = await fetch('/api/info', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        const returned = data.info || []
+        if (returned.length > 0) {
+          setInfoId(returned[0].id || infoId)
+        }
+        alert('Đã lưu thông tin liên hệ')
+      } else {
+        const err = await res.json()
+        setError(err.error || 'Lỗi khi lưu thông tin')
+      }
+    } catch (err) {
+      console.error('Error saving site info:', err)
+      setError('Lỗi khi lưu thông tin')
+    } finally {
+      setInfoSaving(false)
+    }
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -268,6 +334,45 @@ export default function AdminPage() {
                 <div className="text-sm text-gray-500">Đang upload...</div>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Site Info (phone/address) */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Thông tin cửa hàng</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {infoLoading ? (
+              <div className="text-center py-4">Đang tải thông tin...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Số điện thoại</label>
+                  <Input
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="Số điện thoại"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Địa chỉ</label>
+                  <Input
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Địa chỉ"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="md:col-span-2 flex justify-end">
+                  <Button onClick={handleSaveInfo} disabled={infoSaving} className="flex items-center space-x-2">
+                    <Save className="w-4 h-4" />
+                    <span>Lưu thông tin</span>
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

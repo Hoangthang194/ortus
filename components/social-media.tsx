@@ -1,8 +1,10 @@
 "use client"
 
 import { Facebook, Instagram, Phone } from "lucide-react"
+import useSiteInfo from "@/hooks/use-site-info"
 
 export default function SocialMedia() {
+  const { phoneNumber } = useSiteInfo()
   return (
     <section className="py-16 bg-card animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,11 +76,11 @@ export default function SocialMedia() {
                 Call or message us to make a reservation or ask for more information.
               </p>
               <a
-                href="tel:+84946188848"
+                href={phoneNumber ? `tel:${phoneNumber}` : "tel:+84946188848"}
                 className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold"
               >
                 <Phone size={20} />
-                +84 94 618 88 48
+                {phoneNumber || '+84 94 618 88 48'}
               </a>
             </div>
           </div>

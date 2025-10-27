@@ -1,4 +1,10 @@
+"use client"
+
+import useSiteInfo from "@/hooks/use-site-info"
+
 export default function Hero() {
+  const { phoneNumber } = useSiteInfo()
+
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -25,7 +31,7 @@ export default function Hero() {
             Explore Menu
           </a>
           <a
-            href="tel:+84946188848"
+            href={phoneNumber ? `tel:${phoneNumber}` : "tel:+84946188848"}
             className="px-8 py-3 bg-white/20 text-white border border-white rounded-lg hover:bg-white/30 transition-colors font-sans font-medium"
           >
             Call to Reserve

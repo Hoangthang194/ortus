@@ -1,8 +1,12 @@
+"use client"
+
 import Link from "next/link"
 import { Facebook, Instagram, Twitter } from "lucide-react"
+import useSiteInfo from "@/hooks/use-site-info"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { phoneNumber, address } = useSiteInfo()
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -41,11 +45,11 @@ export default function Footer() {
             <h4 className="font-serif font-bold mb-4">Contact</h4>
             <ul className="space-y-2 font-sans text-sm">
               <li>
-                <a href="tel:0975643330" className="hover:opacity-80 transition-opacity">
-                  0975643330
+                <a href={phoneNumber ? `tel:${phoneNumber}` : "tel:0975643330"} className="hover:opacity-80 transition-opacity">
+                  {phoneNumber || '0975643330'}
                 </a>
               </li>
-              <li>Bãi Tắm, Tân Trà, Đà Nẵng</li>
+              <li>{address || 'Bãi Tắm, Tân Trà, Đà Nẵng'}</li>
             </ul>
           </div>
 

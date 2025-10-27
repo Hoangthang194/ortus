@@ -1,6 +1,11 @@
+"use client"
+
 import { Phone, MapPin, Clock } from "lucide-react"
+import useSiteInfo from "@/hooks/use-site-info"
 
 export default function Contact() {
+  const { phoneNumber, address } = useSiteInfo()
+
   return (
     <section id="contact" className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,10 +22,10 @@ export default function Contact() {
             </div>
             <h3 className="text-xl font-serif font-bold text-primary mb-2">Call Us</h3>
             <a
-              href="tel:0975643330"
+              href={phoneNumber ? `tel:${phoneNumber}` : "tel:0975643330"}
               className="text-lg text-primary hover:text-primary/80 transition-colors font-sans"
             >
-              0975643330
+              {phoneNumber || '0975643330'}
             </a>
           </div>
 
@@ -31,7 +36,7 @@ export default function Contact() {
             </div>
             <h3 className="text-xl font-serif font-bold text-primary mb-2">Location</h3>
             <p className="text-muted-foreground font-sans">
-              Bãi Tắm, Tân Trà, Đà Nẵng, Vietnam 50000
+              {address || 'Bãi Tắm, Tân Trà, Đà Nẵng, Vietnam 50000'}
             </p>
           </div>
 
@@ -52,7 +57,7 @@ export default function Contact() {
         {/* CTA */}
         <div className="mt-16 text-center">
           <a
-            href="tel:+84946188848"
+            href={phoneNumber ? `tel:${phoneNumber}` : "tel:+84946188848"}
             className="inline-block px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-sans font-bold text-lg"
           >
             Reserve Your Table Now

@@ -1,12 +1,35 @@
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { createClient } from '@supabase/supabase-js'
 
 export const metadata = {
   title: "Contact Us - Ortus Bistro & Beers",
   description: "Get in touch with Ortus Bistro & Beers. Visit us or call for reservations.",
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  // Server-side fetch site info (type = 'ortus') to avoid marking this page as a client component
+  let phoneNumber: string | undefined = undefined
+  let address: string | undefined = undefined
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL || ''
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || ''
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    const { data } = await supabase
+      .from(process.env.SUPABASE_INFO_TABLE || 'info_db')
+      .select('*')
+      .eq('type', 'ortus')
+      .limit(1)
+
+    if (data && Array.isArray(data) && data.length > 0) {
+      const first = data[0] as any
+      phoneNumber = first.phone_number || undefined
+      address = first.address || undefined
+    }
+  } catch (err) {
+    console.error('Error fetching site info in contact page:', err)
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <Header />
@@ -18,13 +41,13 @@ export default function ContactPage() {
             <div className="space-y-6">
               <div>
                 <h3 className="font-serif font-bold text-primary mb-2">Phone</h3>
-                <a href="tel:0975643330" className="text-foreground hover:text-primary transition-colors">
-                  0975643330
+                <a href={phoneNumber ? `tel:${phoneNumber}` : "tel:0975643330"} className="text-foreground hover:text-primary transition-colors">
+                  {phoneNumber || '0975643330'}
                 </a>
               </div>
               <div>
                 <h3 className="font-serif font-bold text-primary mb-2">Location</h3>
-                <p className="text-foreground">Bãi Tắm, Tân Trà, Đà Nẵng, Vietnam 50000</p>
+                <p className="text-foreground">{address || 'Bãi Tắm, Tân Trà, Đà Nẵng, Vietnam 50000'}</p>
               </div>
               <div>
                 <h3 className="font-serif font-bold text-primary mb-2">Hours</h3>
@@ -38,7 +61,7 @@ export default function ContactPage() {
               Call us to make a reservation or for any inquiries about our menu and services.
             </p>
             <a
-              href="tel:0975643330"
+              href={phoneNumber ? `tel:${phoneNumber}` : "tel:0975643330"}
               className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-sans font-medium"
             >
               Call to Reserve

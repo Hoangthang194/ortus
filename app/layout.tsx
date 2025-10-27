@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Playfair_Display, Lora } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { createClient } from '@supabase/supabase-js'
 import { LanguageProvider } from "@/lib/language-context"
 import "./globals.css"
 
@@ -85,11 +86,27 @@ export const metadata: Metadata = {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Fetch site info from Supabase to populate structured data
+  let sitePhone = '+84946188848'
+  let siteAddress = '270 Vo Nguyen Giap'
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL || ''
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || ''
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    const { data } = await supabase.from(process.env.SUPABASE_INFO_TABLE || 'info_db').select('*').eq('type', 'ortus').limit(1)
+    if (data && Array.isArray(data) && data.length > 0) {
+      const first = data[0]
+      if (first.phone_number) sitePhone = first.phone_number
+      if (first.address) siteAddress = first.address
+    }
+  } catch (err) {
+    console.error('Error loading site info for layout structured data:', err)
+  }
   return (
     <html lang="en">
       <head>
@@ -106,7 +123,7 @@ export default function RootLayout({
               url: "https://ortus-chi.vercel.app",
               address: {
                 "@type": "PostalAddress",
-                streetAddress: "270 Vo Nguyen Giap",
+                streetAddress: siteAddress,
                 addressLocality: "Da Nang",
                 addressRegion: "Da Nang",
                 addressCountry: "VN",
@@ -117,7 +134,7 @@ export default function RootLayout({
                 latitude: "16.0544",
                 longitude: "108.2478"
               },
-              telephone: "+84946188848",
+              telephone: sitePhone,
               openingHoursSpecification: {
                 "@type": "OpeningHoursSpecification",
                 dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],

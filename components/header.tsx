@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { MenuIcon, X } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { translations } from "@/lib/translations"
+import useSiteInfo from "@/hooks/use-site-info"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -14,6 +15,7 @@ export default function Header() {
   const pathname = usePathname()
   const { language } = useLanguage()
   const t = translations[language]
+  const { phoneNumber } = useSiteInfo()
 
   // Handle scroll detection for animated sticky behavior
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function Header() {
             {t.contact}
           </Link>
           <a
-            href="tel:+84946188848"
+            href={phoneNumber ? `tel:${phoneNumber}` : "tel:+84946188848"}
             className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 font-sans font-medium hover:shadow-lg hover:scale-105"
           >
             {t.reserve}
@@ -142,7 +144,7 @@ export default function Header() {
                 {t.contact}
               </Link>
               <a
-                href="tel:+84946188848"
+                href={phoneNumber ? `tel:${phoneNumber}` : "tel:+84946188848"}
                 className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 text-center font-medium hover:shadow-lg"
               >
                 {t.reserve}
@@ -196,7 +198,7 @@ export default function Header() {
             {t.contact}
           </Link>
           <a
-            href="tel:+84946188848"
+            href={phoneNumber ? `tel:${phoneNumber}` : "tel:+84946188848"}
             className="px-4 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 text-sm font-medium hover:shadow-lg"
           >
             {t.reserve}
@@ -246,7 +248,7 @@ export default function Header() {
                 {t.contact}
               </Link>
               <a
-                href="tel:+84946188848"
+                href={phoneNumber ? `tel:${phoneNumber}` : "tel:+84946188848"}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 text-sm text-center font-medium hover:shadow-lg"
               >
                 {t.reserve}
